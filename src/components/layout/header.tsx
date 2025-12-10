@@ -8,13 +8,56 @@ import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
+import { MAX_HEARTS, HEART_REGEN_RATE } from '@/lib/constants';
 
-const StatItem = ({ icon: Icon, value, label }: { icon: React.ElementType, value: React.ReactNode, label: string }) => (
+const StatItem = ({ icon: Icon, value, label, children }: { icon: React.ElementType, value: React.ReactNode, label: string, children?: React.ReactNode }) => (
     <div className="flex items-center gap-2" aria-label={label}>
         <Icon className="h-6 w-6 text-primary" />
         <span className="text-lg font-bold text-foreground">{value}</span>
+        {children}
     </div>
 );
+
+const HeartTimer = () => {
+    const { userData } = useUserData(localStorage.getItem('aura-learning-last-email'));
+    const [timeLeft, setTimeLeft] = useState(0);
+
+    useEffect(() => {
+        if (!userData || userData.stats.hearts >= MAX_HEARTS) {
+            setTimeLeft(0);
+            return;
+        }
+
+        const calculateTimeLeft = () => {
+            const now = Date.now();
+            const timePassed = now - userData.stats.lastHeartRegen;
+            const remaining = HEART_REGEN_RATE - (timePassed % HEART_REGEN_RATE);
+            return remaining;
+        };
+
+        setTimeLeft(calculateTimeLeft());
+
+        const interval = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [userData]);
+
+    if (!userData || userData.stats.hearts >= MAX_HEARTS) {
+        return null;
+    }
+
+    const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+    const seconds = Math.floor((timeLeft / 1000) % 60);
+
+    return (
+        <span className="text-sm text-muted-foreground">
+            ({`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`})
+        </span>
+    );
+};
+
 
 export function Header() {
     const router = useRouter();
@@ -63,7 +106,9 @@ export function Header() {
                 </Link>
 
                 <div className="flex items-center gap-4 sm:gap-6">
-                    <StatItem icon={Heart} value={userData?.stats.hearts ?? 0} label="Hearts" />
+                    <StatItem icon={Heart} value={userData?.stats.hearts ?? 0} label="Hearts">
+                       <HeartTimer />
+                    </StatItem>
                     <StatItem icon={CircleDollarSign} value={userData?.stats.coins ?? 0} label="Coins" />
                     <StatItem icon={Zap} value={userData?.stats.streak ?? 0} label="Streak" />
                     <StatItem icon={Shield} value={userData?.inventory.streakFreezes ?? 0} label="Streak Freezes" />

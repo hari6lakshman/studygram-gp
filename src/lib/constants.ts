@@ -217,7 +217,7 @@ export const SUBJECTS: Subject[] = [
 ];
 
 export const MAX_HEARTS = 5;
-export const HEART_REGEN_RATE = 6 * 60 * 1000; // 6 minutes in milliseconds
+export const HEART_REGEN_RATE = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 export const STORE_ITEMS = {
   LIFE_REFILL: {
