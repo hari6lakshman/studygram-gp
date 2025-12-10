@@ -82,7 +82,9 @@ export function Header() {
             <header className="w-full p-4 border-b border-primary/20">
                 <div className="flex items-center justify-between max-w-7xl mx-auto">
                     <div className="flex items-center gap-3">
-                        <GraduationCap className="h-8 w-8 text-primary" />
+                        <div className="border-2 border-primary rounded-md p-1">
+                            <GraduationCap className="h-8 w-8 text-primary" />
+                        </div>
                         <h1 className="font-headline text-2xl text-primary">Aura Learning</h1>
                     </div>
                     <div className="flex items-center gap-6">
@@ -101,7 +103,9 @@ export function Header() {
         <header className="w-full p-4 border-b border-primary/20">
             <div className="flex flex-wrap items-center justify-between gap-4 max-w-7xl mx-auto">
                 <Link href="/dashboard" className="flex items-center gap-3">
-                    <GraduationCap className="h-8 w-8 text-primary" />
+                    <div className="border-2 border-primary rounded-md p-1">
+                        <GraduationCap className="h-8 w-8 text-primary" />
+                    </div>
                     <h1 className="font-headline text-2xl text-primary">Aura Learning</h1>
                 </Link>
 

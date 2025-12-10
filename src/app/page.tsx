@@ -94,7 +94,9 @@ export default function LoginPage() {
       <AppContainer className="overflow-hidden">
         <div className="flex flex-col items-center justify-center p-8 sm:p-12 md:p-16">
           <div className="mb-8 flex items-center gap-4">
-            <GraduationCap className="h-12 w-12 text-primary" />
+            <div className="border-2 border-primary rounded-lg p-2">
+                <GraduationCap className="h-12 w-12 text-primary" />
+            </div>
             <h1 className="font-headline text-4xl sm:text-5xl text-primary">Aura Learning</h1>
           </div>
           <p className="mb-8 text-center text-lg text-muted-foreground">
