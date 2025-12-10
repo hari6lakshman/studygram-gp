@@ -80,7 +80,7 @@ export default function TopicSelectionPage() {
                       <CardTitle className="font-headline text-2xl">{topic.title}</CardTitle>
                       <CardDescription>{topic.description}</CardDescription>
                     </div>
-                    {progress?.completed && <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 -mr-[60px]"><CheckCircle2 className="mr-2 h-4 w-4" />Completed</Badge>}
+                    {progress?.completed && <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30"><CheckCircle2 className="mr-2 h-4 w-4" />Completed</Badge>}
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
