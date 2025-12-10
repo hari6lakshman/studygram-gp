@@ -102,7 +102,7 @@ export function Header() {
             <div className="flex flex-wrap items-center justify-between gap-4 max-w-7xl mx-auto">
                 <Link href="/dashboard" className="flex items-center gap-3">
                     <GraduationCap className="h-8 w-8 text-primary" />
-                    <h1 className="font-headline text-2xl text-primary hidden sm:block">Aura Learning</h1>
+                    <h1 className="font-headline text-2xl text-primary">Aura Learning</h1>
                 </Link>
 
                 <div className="flex items-center gap-4 sm:gap-6">
