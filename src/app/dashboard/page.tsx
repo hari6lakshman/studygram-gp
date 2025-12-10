@@ -2,28 +2,41 @@
 
 import { useRouter } from 'next/navigation';
 import { useIsClient } from '@/hooks/use-is-client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppContainer } from '@/components/layout/app-container';
 import { SUBJECTS } from '@/lib/constants';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { UserData } from '@/lib/types';
 
 export default function DashboardPage() {
   const router = useRouter();
   const isClient = useIsClient();
+  const [userName, setUserName] = useState<string | null>(null);
   
   useEffect(() => {
-    if (isClient && !localStorage.getItem('aura-learning-last-email')) {
-      router.push('/');
+    if (isClient) {
+      const storedEmail = localStorage.getItem('aura-learning-last-email');
+      if (!storedEmail) {
+        router.push('/');
+      } else {
+        const userKey = `aura-learning-user-${storedEmail}`;
+        const userDataString = localStorage.getItem(userKey);
+        if (userDataString) {
+          const userData: UserData = JSON.parse(userDataString);
+          setUserName(userData.name);
+        }
+      }
     }
   }, [isClient, router]);
   
-  if (!isClient) {
+  if (!isClient || !userName) {
     return (
       <AppContainer>
         <div className="p-8">
-          <Skeleton className="h-10 w-1/2 mx-auto mb-8" />
+          <Skeleton className="h-10 w-1/2 mx-auto mb-2" />
+          <Skeleton className="h-6 w-1/3 mx-auto mb-8" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-28" />)}
           </div>
@@ -35,6 +48,7 @@ export default function DashboardPage() {
   return (
     <AppContainer>
       <div className="p-8">
+        <h1 className="font-headline text-4xl text-center text-primary mb-2">Welcome, {userName}!</h1>
         <h2 className="font-headline text-3xl text-center mb-2">Choose a Subject</h2>
         <p className="text-muted-foreground text-center mb-8">Select a subject to start your learning journey.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
