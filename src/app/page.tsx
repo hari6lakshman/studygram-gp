@@ -135,10 +135,6 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
-
-          <p className="mt-8 text-xs text-muted-foreground text-center">
-            No password needed. Your progress is saved on this device.
-          </p>
         </div>
       </AppContainer>
     </main>
