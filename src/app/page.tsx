@@ -96,7 +96,7 @@ export default function LoginPage() {
             <div className="border-2 border-primary rounded-lg p-2">
                 <GraduationCap className="h-12 w-12 text-primary" />
             </div>
-            <h1 className="font-headline text-4xl sm:text-5xl text-primary">Aura</h1>
+            <h1 className="font-headline text-3xl sm:text-4xl text-primary">Aura Learning - Studygram</h1>
           </div>
           <p className="mb-8 text-center text-lg text-muted-foreground">
             Your gamified learning adventure starts here.

@@ -85,7 +85,7 @@ export function Header() {
                         <div className="border-2 border-primary rounded-md p-1">
                             <GraduationCap className="h-8 w-8 text-primary" />
                         </div>
-                        <h1 className="font-headline text-2xl text-primary">Aura</h1>
+                        <h1 className="font-headline text-2xl text-primary">Aura Learning - Studygram</h1>
                     </div>
                     <div className="flex items-center gap-6">
                         <Skeleton className="h-6 w-12 rounded-md" />
@@ -106,7 +106,7 @@ export function Header() {
                     <div className="border-2 border-primary rounded-md p-1">
                         <GraduationCap className="h-8 w-8 text-primary" />
                     </div>
-                    <h1 className="font-headline text-2xl text-primary">Aura</h1>
+                    <h1 className="font-headline text-xl text-primary">Aura Learning - Studygram</h1>
                 </Link>
 
                 <div className="flex items-center gap-4 sm:gap-6">
