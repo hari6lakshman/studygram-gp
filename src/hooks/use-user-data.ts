@@ -59,6 +59,9 @@ export function useUserData(email: string | null) {
           parsedData.stats.lastLogin = Date.now();
         }
 
+        // We don't need to cache questions anymore
+        parsedData.quizCache = {};
+
         setUserData(parsedData);
       } else {
         // This case can happen if login page fails to write, so we create a default user
@@ -137,14 +140,7 @@ export function useUserData(email: string | null) {
   };
   
   const cacheQuizQuestions = (topicId: string, questions: QuizQuestion[]) => {
-    if (!userData) return;
-    updateUserData(prev => ({
-      ...prev,
-      quizCache: {
-        ...prev.quizCache,
-        [topicId]: questions
-      }
-    }));
+    // This is no longer needed with static questions.
   };
 
   const updateUserStats = (stats: Partial<UserData['stats']>) => {

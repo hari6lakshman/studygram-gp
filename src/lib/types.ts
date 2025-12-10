@@ -1,21 +1,22 @@
 export type SubjectName = 'Physics' | 'Chemistry' | 'Math' | 'Biology' | 'Coding';
 
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+}
+
 export interface Topic {
   id: string;
   title: string;
   description: string;
+  questions: QuizQuestion[];
 }
 
 export interface Subject {
   name: SubjectName;
   topics: Topic[];
   icon: (props: React.ComponentProps<'svg'>) => JSX.Element;
-}
-
-export interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: string;
 }
 
 export interface TopicProgress {
@@ -41,6 +42,7 @@ export interface UserData {
     [topicId: string]: TopicProgress;
   };
   quizCache: {
+    // This is no longer used but kept for schema compatibility
     [topicId: string]: QuizQuestion[];
   };
 }

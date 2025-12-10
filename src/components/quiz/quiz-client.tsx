@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useIsClient } from '@/hooks/use-is-client';
 import { useUserData } from '@/hooks/use-user-data';
-import { getQuizQuestionsAction } from '@/app/actions';
 import type { QuizQuestion, Subject, Topic } from '@/lib/types';
 import { SUBJECTS, COINS_PER_QUIZ } from '@/lib/constants';
 import { AppContainer } from '@/components/layout/app-container';
@@ -46,30 +45,27 @@ export function QuizClient() {
     }
   }, [isClient, router]);
 
-  const { userData, updateUserStats, updateTopicProgress, cacheQuizQuestions } = useUserData(email);
+  const { userData, updateUserStats, updateTopicProgress } = useUserData(email);
 
   useEffect(() => {
-    if (!topic || !userData) return;
+    if (!topic) return;
 
-    const fetchQuestions = async () => {
+    const fetchQuestions = () => {
       setLoadingQuestions(true);
-      if (userData.quizCache[topicId]) {
-        setQuestions(userData.quizCache[topicId]);
+      // Directly get questions from the topic object
+      if (topic.questions) {
+        // Simple shuffle to make it less repetitive
+        const shuffledQuestions = [...topic.questions].sort(() => Math.random() - 0.5).slice(0, 5);
+        setQuestions(shuffledQuestions);
       } else {
-        const response = await getQuizQuestionsAction({ topic: topic.title, numQuestions: 5 });
-        if (response.success && response.data) {
-          setQuestions(response.data);
-          cacheQuizQuestions(topicId, response.data);
-        } else {
-          toast({ title: "Error", description: "Could not load quiz questions. Please try again later.", variant: "destructive" });
-          router.back();
-        }
+        toast({ title: "Error", description: "Could not load quiz questions. Please try again later.", variant: "destructive" });
+        router.back();
       }
       setLoadingQuestions(false);
     };
 
     fetchQuestions();
-  }, [topic, topicId, userData, cacheQuizQuestions, router, toast]);
+  }, [topic, router, toast]);
 
   const handleAnswer = (option: string) => {
     if (isAnswered) return;
