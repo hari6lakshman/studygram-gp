@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { AppContainer } from '@/components/layout/app-container';
 import { GraduationCap } from 'lucide-react';
+import type { UserData } from '@/lib/types';
 
 const loginSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -21,12 +22,20 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<{name: string} | null>(null);
 
   useEffect(() => {
     setIsClient(true);
     const storedEmail = localStorage.getItem('aura-learning-last-email');
     if (storedEmail) {
-      router.push('/dashboard');
+      const userKey = `aura-learning-user-${storedEmail}`;
+      const userDataString = localStorage.getItem(userKey);
+      if (userDataString) {
+        const userData: UserData = JSON.parse(userDataString);
+        setLoggedInUser({ name: userData.name });
+      }
+      // Redirect after a short delay to show the message
+      setTimeout(() => router.push('/dashboard'), 1500);
     }
   }, [router]);
 
@@ -69,10 +78,13 @@ export default function LoginPage() {
     );
   }
 
-  if (isClient && localStorage.getItem('aura-learning-last-email')) {
+  if (loggedInUser) {
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
-            <p className="text-foreground">Redirecting to your dashboard...</p>
+            <div className="text-center">
+              <h1 className="font-headline text-4xl text-primary mb-4">Welcome back, {loggedInUser.name}!</h1>
+              <p className="text-foreground">Redirecting to your dashboard...</p>
+            </div>
         </div>
     );
   }
