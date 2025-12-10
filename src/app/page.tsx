@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormLabel, FormMessage } from '@/components/ui/form';
 import { AppContainer } from '@/components/layout/app-container';
 import { GraduationCap } from 'lucide-react';
 import type { UserData } from '@/lib/types';
@@ -17,29 +17,28 @@ const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<{name: string} | null>(null);
+  const [user, setUser] = useState<{name: string} | null>(null);
 
   useEffect(() => {
     setIsClient(true);
-    const storedEmail = localStorage.getItem('aura-learning-last-email');
-    if (storedEmail) {
-      const userKey = `aura-learning-user-${storedEmail}`;
+    const email = localStorage.getItem('aura-last-email');
+    if (email) {
+      const userKey = `aura-user-${email}`;
       const userDataString = localStorage.getItem(userKey);
       if (userDataString) {
         const userData: UserData = JSON.parse(userDataString);
-        setLoggedInUser({ name: userData.name });
+        setUser({ name: userData.name });
       }
-      // Redirect after a short delay to show the message
       setTimeout(() => router.push('/dashboard'), 1500);
     }
   }, [router]);
 
-  const form = useForm<LoginFormValues>({
+  const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       name: '',
@@ -47,24 +46,24 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(data: LoginFormValues) {
-    localStorage.setItem('aura-learning-last-email', data.email);
-    const key = `aura-learning-user-${data.email}`;
-    const existingData = localStorage.getItem(key);
-    if (!existingData) {
+  function onSubmit(data: LoginValues) {
+    localStorage.setItem('aura-last-email', data.email);
+    const key = `aura-user-${data.email}`;
+    const oldData = localStorage.getItem(key);
+    if (!oldData) {
       const initialData = {
           email: data.email,
           name: data.name,
-          stats: { hearts: 5, lastHeartRegen: Date.now(), coins: 0, streak: 1, lastLogin: Date.now() },
-          inventory: { streakFreezes: 0 },
+          stats: { hearts: 5, lastRegen: Date.now(), coins: 0, streak: 1, lastLogin: Date.now() },
+          inventory: { streakFreeze: 0 },
           progress: {},
           quizCache: {}
       }
       localStorage.setItem(key, JSON.stringify(initialData));
     } else {
-        const parsedData = JSON.parse(existingData);
-        parsedData.name = data.name;
-        localStorage.setItem(key, JSON.stringify(parsedData));
+        const parsed = JSON.parse(oldData);
+        parsed.name = data.name;
+        localStorage.setItem(key, JSON.stringify(parsed));
     }
 
     router.push('/dashboard');
@@ -73,16 +72,16 @@ export default function LoginPage() {
   if (!isClient) {
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
-            <p className="text-foreground">Loading Aura...</p>
+            <p className="text-foreground">Loading...</p>
         </div>
     );
   }
 
-  if (loggedInUser) {
+  if (user) {
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-background">
             <div className="text-center">
-              <h1 className="font-headline text-4xl text-primary mb-4">Welcome back, {loggedInUser.name}!</h1>
+              <h1 className="font-headline text-4xl text-primary mb-4">Welcome back, {user.name}!</h1>
               <p className="text-foreground">Redirecting to your dashboard...</p>
             </div>
         </div>
@@ -97,10 +96,10 @@ export default function LoginPage() {
             <div className="border-2 border-primary rounded-lg p-2">
                 <GraduationCap className="h-12 w-12 text-primary" />
             </div>
-            <h1 className="font-headline text-4xl sm:text-5xl text-primary">Aura Learning</h1>
+            <h1 className="font-headline text-4xl sm:text-5xl text-primary">Aura</h1>
           </div>
           <p className="mb-8 text-center text-lg text-muted-foreground">
-            Your personalized, gamified studygram.
+            Your gamified learning adventure starts here.
           </p>
           
           <Form {...form}>
@@ -109,30 +108,30 @@ export default function LoginPage() {
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormLabel>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your name" {...field} />
+                      <Input placeholder="Your name" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                  </FormLabel>
                 )}
               />
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormLabel>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
+                      <Input type="email" placeholder="your@email.com" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                  </FormLabel>
                 )}
               />
               <Button type="submit" className="w-full" size="lg">
-                Begin Your Journey
+                Start Learning
               </Button>
             </form>
           </Form>

@@ -11,7 +11,7 @@ export function AppContainer({
     <div className="flex min-h-full w-full items-center justify-center p-4 sm:p-6 md:p-8">
       <div
         className={cn(
-          'w-full max-w-4xl rounded-2xl border bg-card text-card-foreground glow-border',
+          'w-full max-w-4xl rounded-2xl border bg-card text-card-foreground glow',
           className
         )}
       >

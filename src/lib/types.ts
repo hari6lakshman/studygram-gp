@@ -1,16 +1,16 @@
 export type SubjectName = 'Physics' | 'Chemistry' | 'Math' | 'Biology' | 'Coding';
 
-export interface QuizQuestion {
+export interface Question {
   question: string;
   options: string[];
-  correctAnswer: string;
+  answer: string;
 }
 
 export interface Topic {
   id: string;
   title: string;
   description: string;
-  questions: QuizQuestion[];
+  questions: Question[];
 }
 
 export interface Subject {
@@ -21,8 +21,8 @@ export interface Subject {
 
 export interface TopicProgress {
   completed: boolean;
-  highScore: number;
-  starRating: number;
+  score: number;
+  stars: number;
 }
 
 export interface UserData {
@@ -30,19 +30,18 @@ export interface UserData {
   email: string;
   stats: {
     hearts: number;
-    lastHeartRegen: number; // timestamp
+    lastRegen: number;
     coins: number;
     streak: number;
-    lastLogin: number; // timestamp for streak
+    lastLogin: number;
   };
   inventory: {
-    streakFreezes: number;
+    streakFreeze: number;
   };
   progress: {
     [topicId: string]: TopicProgress;
   };
   quizCache: {
-    // This is no longer used but kept for schema compatibility
-    [topicId: string]: QuizQuestion[];
+    [topicId: string]: Question[];
   };
 }

@@ -25,7 +25,7 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-export default function TopicSelectionPage() {
+export default function TopicPage() {
   const router = useRouter();
   const params = useParams();
   const isClient = useIsClient();
@@ -33,11 +33,11 @@ export default function TopicSelectionPage() {
 
   useEffect(() => {
     if (isClient) {
-        const storedEmail = localStorage.getItem('aura-learning-last-email');
-        if (!storedEmail) {
+        const savedEmail = localStorage.getItem('aura-last-email');
+        if (!savedEmail) {
             router.push('/');
         } else {
-            setEmail(storedEmail);
+            setEmail(savedEmail);
         }
     }
   }, [isClient, router]);
@@ -85,10 +85,10 @@ export default function TopicSelectionPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <span className="font-semibold">High Score:</span>
-                        <span>{progress?.highScore ?? 0}/5</span>
+                        <span className="font-semibold">Best Score:</span>
+                        <span>{progress?.score ?? 0}/5</span>
                     </div>
-                    <StarRating rating={progress?.starRating ?? 0} />
+                    <StarRating rating={progress?.stars ?? 0} />
                 </CardContent>
                 <CardFooter>
                     <Link href={`/quiz/${subject.name.toLowerCase()}/${topic.id}`} className="w-full">

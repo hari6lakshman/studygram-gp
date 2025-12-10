@@ -4,17 +4,17 @@
 
 @layer base {
   :root {
-    --background: 210 100% 24%; /* Deep, rich dark blue */
-    --foreground: 210 20% 85%; /* Soft off-white */
+    --background: 210 100% 24%;
+    --foreground: 210 20% 85%;
 
-    --card: 210 100% 20%; /* Slightly darker blue */
+    --card: 210 100% 20%;
     --card-foreground: 210 20% 85%;
 
     --popover: 210 100% 20%;
     --popover-foreground: 210 20% 85%;
 
-    --primary: 45 84% 49%; /* Vibrant gold */
-    --primary-foreground: 210 100% 10%; /* Dark blue for text on gold */
+    --primary: 45 84% 49%;
+    --primary-foreground: 210 100% 10%;
 
     --secondary: 210 100% 30%;
     --secondary-foreground: 45 84% 49%;
@@ -49,17 +49,17 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 210 100% 24%; /* Deep, rich dark blue */
-    --foreground: 210 20% 85%; /* Soft off-white */
+    --background: 210 100% 24%;
+    --foreground: 210 20% 85%;
 
-    --card: 210 100% 20%; /* Slightly darker blue */
+    --card: 210 100% 20%;
     --card-foreground: 210 20% 85%;
 
     --popover: 210 100% 20%;
     --popover-foreground: 210 20% 85%;
 
-    --primary: 45 84% 49%; /* Vibrant gold */
-    --primary-foreground: 210 100% 10%; /* Dark blue for text on gold */
+    --primary: 45 84% 49%;
+    --primary-foreground: 210 100% 10%;
 
     --secondary: 210 100% 30%;
     --secondary-foreground: 45 84% 49%;
@@ -103,7 +103,7 @@
 }
 
 @layer utilities {
-  .glow-border {
+  .glow {
     box-shadow: 0 0 8px hsl(var(--accent)), 0 0 12px hsl(var(--accent) / 0.7);
   }
 }

@@ -1,24 +1,24 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { UserData, TopicProgress, QuizQuestion } from '@/lib/types';
+import type { UserData, TopicProgress, Question } from '@/lib/types';
 import { MAX_HEARTS, HEART_REGEN_RATE } from '@/lib/constants';
 import { isToday, isYesterday } from 'date-fns';
 
-const getLocalStorageKey = (email: string) => `aura-learning-user-${email}`;
+const getUserStorageKey = (email: string) => `aura-user-${email}`;
 
 const getInitialUserData = (email: string, name: string): UserData => ({
   email,
   name,
   stats: {
     hearts: MAX_HEARTS,
-    lastHeartRegen: Date.now(),
+    lastRegen: Date.now(),
     coins: 0,
     streak: 0,
     lastLogin: Date.now(),
   },
   inventory: {
-    streakFreezes: 0,
+    streakFreeze: 0,
   },
   progress: {},
   quizCache: {},
@@ -29,7 +29,7 @@ export function useUserData(email: string | null) {
   const [loading, setLoading] = useState(true);
 
   const getStorageKey = useCallback(() => {
-    return email ? getLocalStorageKey(email) : null;
+    return email ? getUserStorageKey(email) : null;
   }, [email]);
 
   useEffect(() => {
@@ -50,8 +50,8 @@ export function useUserData(email: string | null) {
           if (isYesterday(new Date(parsedData.stats.lastLogin))) {
             parsedData.stats.streak += 1;
           } else {
-            if (parsedData.inventory.streakFreezes > 0) {
-              parsedData.inventory.streakFreezes -= 1;
+            if (parsedData.inventory.streakFreeze > 0) {
+              parsedData.inventory.streakFreeze -= 1;
             } else {
               parsedData.stats.streak = 1; 
             }
@@ -59,12 +59,10 @@ export function useUserData(email: string | null) {
           parsedData.stats.lastLogin = Date.now();
         }
 
-        // We don't need to cache questions anymore
         parsedData.quizCache = {};
 
         setUserData(parsedData);
       } else {
-        // This case can happen if login page fails to write, so we create a default user
         const defaultUser = getInitialUserData(email, "Student");
         localStorage.setItem(storageKey, JSON.stringify(defaultUser));
         setUserData(defaultUser);
@@ -85,36 +83,36 @@ export function useUserData(email: string | null) {
       if (userData.stats.hearts >= MAX_HEARTS) return;
 
       const timer = setInterval(() => {
-        setUserData(prev => {
-          if (!prev || prev.stats.hearts >= MAX_HEARTS) {
+        setUserData(prevData => {
+          if (!prevData || prevData.stats.hearts >= MAX_HEARTS) {
             clearInterval(timer);
-            return prev;
+            return prevData;
           }
           const now = Date.now();
-          const timeDiff = now - prev.stats.lastHeartRegen;
-          const heartsToRegen = Math.floor(timeDiff / HEART_REGEN_RATE);
+          const timeDifference = now - prevData.stats.lastRegen;
+          const heartsToRegen = Math.floor(timeDifference / HEART_REGEN_RATE);
 
           if(heartsToRegen > 0) {
-            const updatedHearts = Math.min(MAX_HEARTS, prev.stats.hearts + heartsToRegen);
-            const newLastRegen = prev.stats.lastHeartRegen + heartsToRegen * HEART_REGEN_RATE;
+            const newHeartCount = Math.min(MAX_HEARTS, prevData.stats.hearts + heartsToRegen);
+            const newLastRegen = prevData.stats.lastRegen + heartsToRegen * HEART_REGEN_RATE;
              return {
-              ...prev,
+              ...prevData,
               stats: {
-                ...prev.stats,
-                hearts: updatedHearts,
-                lastHeartRegen: newLastRegen,
+                ...prevData.stats,
+                hearts: newHeartCount,
+                lastRegen: newLastRegen,
               }
             };
           }
-          return prev;
+          return prevData;
         });
-      }, 60000); // Check every minute
+      }, 60000);
 
       return () => clearInterval(timer);
     }
   }, [userData, getStorageKey]);
   
-  const updateUserData = useCallback((newUserData: UserData | ((prev: UserData) => UserData) ) => {
+  const setUserDataWrapper = useCallback((newUserData: UserData | ((prev: UserData) => UserData) ) => {
     setUserData(prev => {
         const dataToUpdate = typeof newUserData === 'function' ? newUserData(prev!) : newUserData;
         const storageKey = getStorageKey();
@@ -125,27 +123,23 @@ export function useUserData(email: string | null) {
     });
   }, [getStorageKey]);
 
-  const updateTopicProgress = (topicId: string, progress: Partial<TopicProgress>) => {
+  const setUserProgress = (topicId: string, progress: Partial<TopicProgress>) => {
     if (!userData) return;
-    updateUserData(prev => ({
+    setUserDataWrapper(prev => ({
         ...prev,
         progress: {
             ...prev.progress,
             [topicId]: {
-                ...(prev.progress[topicId] || { completed: false, highScore: 0, starRating: 0 }),
+                ...(prev.progress[topicId] || { completed: false, score: 0, stars: 0 }),
                 ...progress
             }
         }
     }));
   };
   
-  const cacheQuizQuestions = (topicId: string, questions: QuizQuestion[]) => {
-    // This is no longer needed with static questions.
-  };
-
-  const updateUserStats = (stats: Partial<UserData['stats']>) => {
+  const setUserStats = (stats: Partial<UserData['stats']>) => {
     if (!userData) return;
-    updateUserData(prev => ({
+    setUserDataWrapper(prev => ({
       ...prev,
       stats: {
         ...prev.stats,
@@ -154,9 +148,9 @@ export function useUserData(email: string | null) {
     }));
   }
 
-  const updateUserInventory = (inventory: Partial<UserData['inventory']>) => {
+  const setUserInventory = (inventory: Partial<UserData['inventory']>) => {
     if (!userData) return;
-    updateUserData(prev => ({
+    setUserDataWrapper(prev => ({
       ...prev,
       inventory: {
         ...prev.inventory,
@@ -165,5 +159,5 @@ export function useUserData(email: string | null) {
     }));
   }
 
-  return { userData, loading, updateTopicProgress, cacheQuizQuestions, updateUserStats, updateUserInventory, setUserData };
+  return { userData, loading, setUserProgress, setUserStats, setUserInventory, setUserData: setUserDataWrapper };
 }

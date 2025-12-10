@@ -20,58 +20,58 @@ export default function StorePage() {
 
   useEffect(() => {
     if (isClient) {
-      const storedEmail = localStorage.getItem('aura-learning-last-email');
-      if (!storedEmail) {
+      const savedEmail = localStorage.getItem('aura-last-email');
+      if (!savedEmail) {
         router.push('/');
       } else {
-        setEmail(storedEmail);
+        setEmail(savedEmail);
       }
     }
   }, [isClient, router]);
   
-  const { userData, updateUserStats, updateUserInventory } = useUserData(email);
+  const { userData, setUserStats, setUserInventory } = useUserData(email);
 
-  const handleBuyLifeRefill = () => {
+  const buyHeartRefill = () => {
     if (!userData) return;
-    if (userData.stats.coins < STORE_ITEMS.LIFE_REFILL.price) {
-        toast({ title: "Not enough coins!", description: "Complete more quizzes to earn coins.", variant: 'destructive' });
+    if (userData.stats.coins < STORE_ITEMS.HEART_REFILL.price) {
+        toast({ title: "Not enough coins!", description: "Complete quizzes to earn more coins.", variant: 'destructive' });
         return;
     }
     if (userData.stats.hearts === MAX_HEARTS) {
-        toast({ title: "Hearts already full!", description: "No need to refill your hearts right now." });
+        toast({ title: "Hearts already full!", description: "No need to buy a heart refill." });
         return;
     }
 
-    updateUserStats({
-        coins: userData.stats.coins - STORE_ITEMS.LIFE_REFILL.price,
+    setUserStats({
+        coins: userData.stats.coins - STORE_ITEMS.HEART_REFILL.price,
         hearts: MAX_HEARTS,
     });
-    toast({ title: "Purchase Successful!", description: "Your hearts have been refilled." });
+    toast({ title: "Purchase successful!", description: "Your hearts have been refilled." });
   };
 
-  const handleBuyStreakFreeze = () => {
+  const buyStreakFreeze = () => {
     if (!userData) return;
     if (userData.stats.coins < STORE_ITEMS.STREAK_FREEZE.price) {
-        toast({ title: "Not enough coins!", description: "Complete more quizzes to earn coins.", variant: 'destructive' });
+        toast({ title: "Not enough coins!", description: "Complete quizzes to earn more coins.", variant: 'destructive' });
         return;
     }
     
-    updateUserInventory({
-        streakFreezes: (userData.inventory.streakFreezes || 0) + 1,
+    setUserInventory({
+        streakFreeze: (userData.inventory.streakFreeze || 0) + 1,
     });
-    updateUserStats({
+    setUserStats({
         coins: userData.stats.coins - STORE_ITEMS.STREAK_FREEZE.price,
     });
-    toast({ title: "Purchase Successful!", description: "You've acquired a Streak Freeze!" });
+    toast({ title: "Purchase successful!", description: "You've got a Streak Freeze!" });
   };
 
   const storeItems = [
     {
         icon: Heart,
-        title: STORE_ITEMS.LIFE_REFILL.name,
-        description: STORE_ITEMS.LIFE_REFILL.description,
-        price: STORE_ITEMS.LIFE_REFILL.price,
-        onBuy: handleBuyLifeRefill,
+        title: STORE_ITEMS.HEART_REFILL.name,
+        description: STORE_ITEMS.HEART_REFILL.description,
+        price: STORE_ITEMS.HEART_REFILL.price,
+        onBuy: buyHeartRefill,
         disabled: userData?.stats.hearts === MAX_HEARTS,
         owned: null
     },
@@ -80,9 +80,9 @@ export default function StorePage() {
         title: STORE_ITEMS.STREAK_FREEZE.name,
         description: STORE_ITEMS.STREAK_FREEZE.description,
         price: STORE_ITEMS.STREAK_FREEZE.price,
-        onBuy: handleBuyStreakFreeze,
+        onBuy: buyStreakFreeze,
         disabled: false,
-        owned: userData?.inventory.streakFreezes
+        owned: userData?.inventory.streakFreeze
     },
   ];
 
@@ -103,8 +103,12 @@ export default function StorePage() {
   return (
     <AppContainer>
       <div className="p-8">
-        <h2 className="font-headline text-4xl text-center mb-2">Aura Store</h2>
-        <p className="text-muted-foreground text-center mb-8">Spend your hard-earned coins on powerful items.</p>
+        <Button variant="outline" onClick={() => router.back()} className="mb-8">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Go Back
+        </Button>
+        <h2 className="font-headline text-4xl text-center mb-2">Store</h2>
+        <p className="text-muted-foreground text-center mb-8">Spend your coins on powerful items.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {storeItems.map(item => (
@@ -113,7 +117,7 @@ export default function StorePage() {
                         <item.icon className="h-16 w-16 text-primary mb-4" />
                         <CardTitle className="font-headline text-2xl">{item.title}</CardTitle>
                         <CardDescription>{item.description}</CardDescription>
-                        {item.owned !== null && <p className="text-sm text-primary font-bold mt-2">Owned: {item.owned}</p>}
+                        {item.owned !== null && <p className="text-sm text-primary font-bold mt-2">You own: {item.owned}</p>}
                     </CardHeader>
                     <CardContent className="flex-grow"/>
                     <CardFooter>
@@ -125,10 +129,6 @@ export default function StorePage() {
                 </Card>
             ))}
         </div>
-        <Button variant="outline" onClick={() => router.back()} className="mt-8">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Go Back
-        </Button>
       </div>
     </AppContainer>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useIsClient } from '@/hooks/use-is-client';
 import { useUserData } from '@/hooks/use-user-data';
-import type { QuizQuestion, Subject, Topic } from '@/lib/types';
+import type { Question, Subject, Topic } from '@/lib/types';
 import { SUBJECTS, COINS_PER_QUIZ } from '@/lib/constants';
 import { AppContainer } from '@/components/layout/app-container';
 import { Button } from '@/components/ui/button';
@@ -29,42 +29,40 @@ export function QuizClient() {
   const subject: Subject | undefined = SUBJECTS.find(s => s.name.toLowerCase() === subjectName);
   const topic: Topic | undefined = subject?.topics.find(t => t.id === topicId);
 
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
-  const [loadingQuestions, setLoadingQuestions] = useState(true);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [score, setScore] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
+  const [currentScore, setCurrentScore] = useState(0);
+  const [isQuizOver, setIsQuizOver] = useState(false);
 
   useEffect(() => {
     if (isClient) {
-      const storedEmail = localStorage.getItem('aura-learning-last-email');
-      if (!storedEmail) router.push('/');
-      else setEmail(storedEmail);
+      const savedEmail = localStorage.getItem('aura-last-email');
+      if (!savedEmail) router.push('/');
+      else setEmail(savedEmail);
     }
   }, [isClient, router]);
 
-  const { userData, updateUserStats, updateTopicProgress } = useUserData(email);
+  const { userData, setUserStats, setUserProgress } = useUserData(email);
 
   useEffect(() => {
     if (!topic) return;
 
-    const fetchQuestions = () => {
-      setLoadingQuestions(true);
-      // Directly get questions from the topic object
+    const loadQuestions = () => {
+      setIsLoading(true);
       if (topic.questions) {
-        // Simple shuffle to make it less repetitive
         const shuffledQuestions = [...topic.questions].sort(() => Math.random() - 0.5).slice(0, 5);
         setQuestions(shuffledQuestions);
       } else {
-        toast({ title: "Error", description: "Could not load quiz questions. Please try again later.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not load quiz questions. Please try again.", variant: "destructive" });
         router.back();
       }
-      setLoadingQuestions(false);
+      setIsLoading(false);
     };
 
-    fetchQuestions();
+    loadQuestions();
   }, [topic, router, toast]);
 
   const handleAnswer = (option: string) => {
@@ -73,18 +71,18 @@ export function QuizClient() {
     setSelectedAnswer(option);
     setIsAnswered(true);
     
-    if (option === questions[currentQuestionIndex].correctAnswer) {
-      setScore(s => s + 1);
+    if (option === questions[questionIndex].answer) {
+      setCurrentScore(s => s + 1);
     } else {
       if(userData && userData.stats.hearts > 0) {
-        updateUserStats({ hearts: userData.stats.hearts - 1, lastHeartRegen: Date.now() });
+        setUserStats({ hearts: userData.stats.hearts - 1, lastRegen: Date.now() });
       }
     }
   };
 
-  const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(i => i + 1);
+  const handleNextQuestion = () => {
+    if (questionIndex < questions.length - 1) {
+      setQuestionIndex(i => i + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
     } else {
@@ -94,30 +92,30 @@ export function QuizClient() {
 
   const finishQuiz = () => {
     if (!userData || questions.length === 0) return;
-    const previousProgress = userData.progress[topicId];
-    const newHighScore = Math.max(previousProgress?.highScore ?? 0, score);
-    const accuracy = score / questions.length;
-    let starRating = 0;
-    if (accuracy === 1) starRating = 5;
-    else if (accuracy >= 0.8) starRating = 4;
-    else if (accuracy >= 0.6) starRating = 3;
-    else if (accuracy >= 0.4) starRating = 2;
-    else if (accuracy > 0) starRating = 1;
+    const oldProgress = userData.progress[topicId];
+    const newBestScore = Math.max(oldProgress?.score ?? 0, currentScore);
+    const accuracy = currentScore / questions.length;
+    let newStarRating = 0;
+    if (accuracy === 1) newStarRating = 5;
+    else if (accuracy >= 0.8) newStarRating = 4;
+    else if (accuracy >= 0.6) newStarRating = 3;
+    else if (accuracy >= 0.4) newStarRating = 2;
+    else if (accuracy > 0) newStarRating = 1;
 
-    const newStarRating = Math.max(previousProgress?.starRating ?? 0, starRating);
+    const finalStarRating = Math.max(oldProgress?.stars ?? 0, newStarRating);
 
-    updateTopicProgress(topicId, {
+    setUserProgress(topicId, {
       completed: true,
-      highScore: newHighScore,
-      starRating: newStarRating,
+      score: newBestScore,
+      stars: finalStarRating,
     });
     
-    updateUserStats({ coins: userData.stats.coins + COINS_PER_QUIZ });
+    setUserStats({ coins: userData.stats.coins + COINS_PER_QUIZ });
 
-    setIsFinished(true);
+    setIsQuizOver(true);
   };
 
-  if (loadingQuestions || !userData || !topic) {
+  if (isLoading || !userData || !topic) {
     return (
         <AppContainer>
             <div className="p-8 space-y-8">
@@ -141,21 +139,21 @@ export function QuizClient() {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Out of Hearts!</AlertDialogTitle>
                     <AlertDialogDescription>
-                        You've run out of hearts. Wait for them to regenerate or visit the store to refill.
+                        You've run out of hearts. You can wait for them to regenerate or visit the store.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogAction onClick={() => router.push('/store')}>Go to Store</AlertDialogAction>
-                    <AlertDialogAction onClick={() => router.push('/dashboard')}>Back to Dashboard</AlertDialogAction>
+                    <AlertDialogAction onClick={() => router.push('/dashboard')}>Go to Dashboard</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
     );
   }
   
-  const currentQuestion = questions[currentQuestionIndex];
-  if (!currentQuestion) return null; // Should not happen if loading is done
-  const progressPercentage = ((currentQuestionIndex) / questions.length) * 100;
+  const currentQuestion = questions[questionIndex];
+  if (!currentQuestion) return null;
+  const progressPercentage = ((questionIndex) / questions.length) * 100;
 
   return (
     <>
@@ -163,7 +161,7 @@ export function QuizClient() {
         <div className="p-8">
           <div className="mb-4">
             <Progress value={progressPercentage} className="h-2" />
-            <p className="text-sm text-muted-foreground text-center mt-2">Question {currentQuestionIndex + 1} of {questions.length}</p>
+            <p className="text-sm text-muted-foreground text-center mt-2">Question {questionIndex + 1} of {questions.length}</p>
           </div>
           
           <Card className="bg-card/50">
@@ -172,7 +170,7 @@ export function QuizClient() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentQuestion.options.map((option) => {
-                const isCorrect = option === currentQuestion.correctAnswer;
+                const isCorrect = option === currentQuestion.answer;
                 const isSelected = option === selectedAnswer;
                 
                 return (
@@ -201,21 +199,21 @@ export function QuizClient() {
           
           {isAnswered && (
             <div className="mt-4 flex justify-end">
-              <Button onClick={handleNext}>
-                {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+              <Button onClick={handleNextQuestion}>
+                {questionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
               </Button>
             </div>
           )}
         </div>
       </AppContainer>
 
-      <AlertDialog open={isFinished}>
+      <AlertDialog open={isQuizOver}>
         <AlertDialogContent>
           <AlertDialogHeader className="items-center">
             <Award className="h-16 w-16 text-primary" />
             <AlertDialogTitle className="font-headline text-3xl">Quiz Complete!</AlertDialogTitle>
             <AlertDialogDescription>
-              You scored {score} out of {questions.length}.
+              You scored {currentScore} out of {questions.length}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-center items-center gap-4 text-2xl font-bold text-primary">
@@ -223,7 +221,7 @@ export function QuizClient() {
             <span>+ {COINS_PER_QUIZ}</span>
           </div>
           <AlertDialogFooter className="mt-4">
-            <AlertDialogAction onClick={() => router.replace(`/topics/${subjectName}`)}>Continue Learning</AlertDialogAction>
+            <AlertDialogAction onClick={() => router.replace(`/topics/${subjectName}`)}>Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

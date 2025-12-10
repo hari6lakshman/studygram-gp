@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Aura Learning: Gamified Studygram',
-  description: 'A gamified educational web application for students.',
+  title: 'Aura',
+  description: 'A gamified education app for students.',
 };
 
 export default function RootLayout({

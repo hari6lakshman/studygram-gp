@@ -17,11 +17,11 @@ export default function DashboardPage() {
   
   useEffect(() => {
     if (isClient) {
-      const storedEmail = localStorage.getItem('aura-learning-last-email');
-      if (!storedEmail) {
+      const email = localStorage.getItem('aura-last-email');
+      if (!email) {
         router.push('/');
       } else {
-        const userKey = `aura-learning-user-${storedEmail}`;
+        const userKey = `aura-user-${email}`;
         const userDataString = localStorage.getItem(userKey);
         if (userDataString) {
           const userData: UserData = JSON.parse(userDataString);
@@ -48,9 +48,9 @@ export default function DashboardPage() {
   return (
     <AppContainer>
       <div className="p-8">
-        <h1 className="font-headline text-4xl text-center text-primary mb-2">Welcome, {userName}!</h1>
-        <h2 className="font-headline text-3xl text-center mb-2">Choose a Subject</h2>
-        <p className="text-muted-foreground text-center mb-8">Select a subject to start your learning journey.</p>
+        <h1 className="font-headline text-4xl text-center text-primary mb-2">Hi, {userName}!</h1>
+        <h2 className="font-headline text-3xl text-center mb-2">Pick a Subject</h2>
+        <p className="text-muted-foreground text-center mb-8">Select a subject to start.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SUBJECTS.map((subject) => (
             <Link key={subject.name} href={`/topics/${subject.name.toLowerCase()}`} passHref>
@@ -60,7 +60,7 @@ export default function DashboardPage() {
                     <subject.icon className="h-10 w-10 text-primary" />
                     <div>
                       <CardTitle className="font-headline text-2xl">{subject.name}</CardTitle>
-                      <CardDescription>Explore topics in {subject.name}.</CardDescription>
+                      <CardDescription>Explore {subject.name}.</CardDescription>
                     </div>
                   </div>
                 </CardHeader>

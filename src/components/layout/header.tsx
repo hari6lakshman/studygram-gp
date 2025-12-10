@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { MAX_HEARTS, HEART_REGEN_RATE } from '@/lib/constants';
 
-const StatItem = ({ icon: Icon, value, label, children }: { icon: React.ElementType, value: React.ReactNode, label: string, children?: React.ReactNode }) => (
+const StatDisplay = ({ icon: Icon, value, label, children }: { icon: React.ElementType, value: React.ReactNode, label: string, children?: React.ReactNode }) => (
     <div className="flex items-center gap-2" aria-label={label}>
         <Icon className="h-6 w-6 text-primary" />
         <span className="text-lg font-bold text-foreground">{value}</span>
@@ -18,8 +18,8 @@ const StatItem = ({ icon: Icon, value, label, children }: { icon: React.ElementT
     </div>
 );
 
-const HeartTimer = () => {
-    const { userData } = useUserData(localStorage.getItem('aura-learning-last-email'));
+const HeartRegenTimer = () => {
+    const { userData } = useUserData(localStorage.getItem('aura-last-email'));
     const [timeLeft, setTimeLeft] = useState(0);
 
     useEffect(() => {
@@ -30,18 +30,18 @@ const HeartTimer = () => {
 
         const calculateTimeLeft = () => {
             const now = Date.now();
-            const timePassed = now - userData.stats.lastHeartRegen;
-            const remaining = HEART_REGEN_RATE - (timePassed % HEART_REGEN_RATE);
-            return remaining;
+            const timePassed = now - userData.stats.lastRegen;
+            const remainder = HEART_REGEN_RATE - (timePassed % HEART_REGEN_RATE);
+            return remainder;
         };
 
         setTimeLeft(calculateTimeLeft());
 
-        const interval = setInterval(() => {
+        const timer = setInterval(() => {
             setTimeLeft(calculateTimeLeft());
         }, 1000);
 
-        return () => clearInterval(interval);
+        return () => clearInterval(timer);
     }, [userData]);
 
     if (!userData || userData.stats.hearts >= MAX_HEARTS) {
@@ -66,14 +66,14 @@ export function Header() {
 
     useEffect(() => {
         if (isClient) {
-            setEmail(localStorage.getItem('aura-learning-last-email'));
+            setEmail(localStorage.getItem('aura-last-email'));
         }
     }, [isClient]);
 
     const { userData, loading } = useUserData(email);
 
     const handleLogout = () => {
-        localStorage.removeItem('aura-learning-last-email');
+        localStorage.removeItem('aura-last-email');
         router.push('/');
     };
 
@@ -85,7 +85,7 @@ export function Header() {
                         <div className="border-2 border-primary rounded-md p-1">
                             <GraduationCap className="h-8 w-8 text-primary" />
                         </div>
-                        <h1 className="font-headline text-2xl text-primary">Aura Learning</h1>
+                        <h1 className="font-headline text-2xl text-primary">Aura</h1>
                     </div>
                     <div className="flex items-center gap-6">
                         <Skeleton className="h-6 w-12 rounded-md" />
@@ -106,16 +106,16 @@ export function Header() {
                     <div className="border-2 border-primary rounded-md p-1">
                         <GraduationCap className="h-8 w-8 text-primary" />
                     </div>
-                    <h1 className="font-headline text-2xl text-primary">Aura Learning</h1>
+                    <h1 className="font-headline text-2xl text-primary">Aura</h1>
                 </Link>
 
                 <div className="flex items-center gap-4 sm:gap-6">
-                    <StatItem icon={Heart} value={userData?.stats.hearts ?? 0} label="Hearts">
-                       <HeartTimer />
-                    </StatItem>
-                    <StatItem icon={CircleDollarSign} value={userData?.stats.coins ?? 0} label="Coins" />
-                    <StatItem icon={Zap} value={userData?.stats.streak ?? 0} label="Streak" />
-                    <StatItem icon={Shield} value={userData?.inventory.streakFreezes ?? 0} label="Streak Freezes" />
+                    <StatDisplay icon={Heart} value={userData?.stats.hearts ?? 0} label="Hearts">
+                       <HeartRegenTimer />
+                    </StatDisplay>
+                    <StatDisplay icon={CircleDollarSign} value={userData?.stats.coins ?? 0} label="Coins" />
+                    <StatDisplay icon={Zap} value={userData?.stats.streak ?? 0} label="Streak" />
+                    <StatDisplay icon={Shield} value={userData?.inventory.streakFreeze ?? 0} label="Streak Freezes" />
                 </div>
 
                 <div className="flex items-center gap-2">
