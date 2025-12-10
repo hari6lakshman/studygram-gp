@@ -106,7 +106,7 @@ export function useUserData(email: string | null) {
           }
           return prevData;
         });
-      }, 60000);
+      }, 1000);
 
       return () => clearInterval(timer);
     }
